@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🪙 Coin Clicker</title>
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      color: #fff; min-height: 100vh; padding: 20px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .container {
+      width: 100%; max-width: 500px; background: rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 25px; backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      text-align: center; margin-bottom: 20px; font-size: 28px;
+      background: linear-gradient(45deg, #ffd700, #ffa500);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(255,215,0,0.3);
+    }
+    .stats {
+      display: flex; justify-content: space-around; margin-bottom: 25px;
+      background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px;
+    }
+    .stat-box {
+      text-align: center; padding: 10px;
+    }
+    .stat-value {
+      font-size: 24px; font-weight: bold; color: #ffd700;
+    }
+    .stat-label {
+      font-size: 12px; opacity: 0.8; margin-top: 5px;
+    }
+    .coin-btn {
+      width: 180px; height: 180px; border-radius: 50%;
+      background: radial-gradient(circle, #ffd700, #ffa500, #ff8c00);
+      border: 8px solid #fff; margin: 20px auto;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 60px; cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255,165,0,0.5);
+      transition: all 0.1s; user-select: none;
+      position: relative; overflow: hidden;
+    }
+    .coin-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 5px 15px rgba(255,165,0,0.3);
+    }
+    .coin-btn::after {
+      content: ''; position: absolute; width: 120%; height: 120%;
+      background: radial-gradient(circle, rgba(255,255,255,0.4), transparent 70%);
+      top: -10%; left: -10%; border-radius: 50%;
+      animation: shine 2s infinite;
+    }
+    @keyframes shine {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .energy-bar {
+      width: 100%; height: 25px; background: rgba(0,0,0,0.3);
+      border-radius: 15px; overflow: hidden; margin: 15px 0;
+      position: relative;
+    }
+    .energy-fill {
+      height: 100%; background: linear-gradient(90deg, #00ff88, #00cc66);
+      width: 100%; transition: width 0.3s; border-radius: 15px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    .nav-buttons {
+      display: flex; gap: 10px; margin: 20px 0;
+    }
+    .nav-btn {
+      flex: 1; padding: 12px; border: none; border-radius: 12px;
+      background: linear-gradient(45deg, #6a11cb, #2575fc);
+      color: white; font-weight: bold; cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .nav-btn:hover { transform: translateY(-2px); }
+    .nav-btn.active {
+      background: linear-gradient(45deg, #ffd700, #ffa500);
+      color: #1a1a2e;
+    }
+    .panel {
+      display: none; animation: fadeIn 0.3s;
+    }
+    .panel.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .upgrade-item {
+      background: rgba(255,255,255,0.1); border-radius: 15px;
+      padding: 15px; margin: 10px 0; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .upgrade-info h4 { margin-bottom: 5px; color: #ffd700; }
+    .upgrade-info p { font-size: 13px; opacity: 0.9; }
+    .buy-btn {
+      padding: 10px 20px; background: linear-gradient(45deg, #00ff88, #00cc66);
+      border: none; border-radius: 10px; color: #1a1a2e;
+      font-weight: bold; cursor: pointer; transition: 0.2s;
+    }
+    .buy-btn:hover { transform: scale(1.05); }
+    .buy-btn:disabled {
+      background: #555; cursor: not-allowed; transform: none;
+    }
+    .withdraw-section {
+      background: rgba(255,255,255,0.1); border-radius: 15px;
+      padding: 20px; margin-top: 15px;
+    }
+    .withdraw-btn {
+      width: 100%; padding: 15px; margin-top: 15px;
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      border: none; border-radius: 15px; color: white;
+      font-size: 18px; font-weight: bold; cursor: pointer;
+      transition: 0.3s;
+    }
+    .withdraw-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(255,75,43,0.4); }
+    .withdraw-btn:disabled {
+      background: #555; cursor: not-allowed; transform: none;
+    }
+    .message {
+      margin-top: 15px; padding: 12px; border-radius: 10px;
+      font-size: 14px; display: none;
+    }
+    .message.success {
+      background: rgba(0,255,136,0.2); border: 1px solid #00ff88;
+      display: block; color: #00ff88;
+    }
+    .message.error {
+      background: rgba(255,75,43,0.2); border: 1px solid #ff4b2b;
+      display: block; color: #ff6b6b;
+    }
+    .telegram-link {
+      display: inline-block; margin-top: 10px; padding: 10px 20px;
+      background: #0088cc; color: white; text-decoration: none;
+      border-radius: 10px; font-weight: bold;
+      transition: 0.2s;
+    }
+    .telegram-link:hover { background: #0099dd; transform: translateY(-2px); }
+    .click-effect {
+      position: absolute; font-weight: bold; color: #ffd700;
+      pointer-events: none; animation: floatUp 1s forwards;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+    }
+    .footer {
+      margin-top: 20px; text-align: center; font-size: 12px; opacity: 0.7;
+    }
+    @media (max-width: 500px) {
+      .container { padding: 15px; }
+      .coin-btn { width: 150px; height: 150px; font-size: 50px; }
+      .stats { flex-direction: column; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🪙 Coin Clicker</h1>
+    
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-value" id="coinCount">0</div>
+        <div class="stat-label">COIN</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="perClick">+1</div>
+        <div class="stat-label">HAR CLICKDA</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="energyCount">1000</div>
+        <div class="stat-label">ENERGIYA</div>
+      </div>
+    </div>
+
+    <!-- Energy Bar -->
+    <div class="energy-bar">
+      <div class="energy-fill" id="energyFill">1000/1000</div>
+    </div>
+
+    <!-- Coin Button -->
+    <button class="coin-btn" id="coinBtn">🪙</button>
+
+    <!-- Navigation -->
+    <div class="nav-buttons">
+      <button class="nav-btn active" data-panel="main">🎮 O'yin</button>
+      <button class="nav-btn" data-panel="upgrade">⬆️ Upgrade</button>
+      <button class="nav-btn" data-panel="withdraw">💰 Yechish</button>
+    </div>
+
+    <!-- Main Panel -->
+    <div id="main" class="panel active">
+      <p style="text-align:center; opacity:0.9; margin:15px 0;">
+        TANGAga bosing va coin ishlanging! ⚡ Har clickda 1 energiya ketadi.
+      </p>
+    </div>
+
+    <!-- Upgrade Panel -->
+    <div id="upgrade" class="panel">
+      <div class="upgrade-item">
+        <div class="upgrade-info">
+          <h4>⚡ Click Kuchi +1</h4>
+          <p>Hozirgi: <span id="currentClick">1</span> coin/click<br>
+          Keyingi: <span id="nextClick">2</span> coin/click</p>
+        </div>
+        <button class="buy-btn" id="buyClickUpgrade" data-cost="15">15 🪙</button>
+      </div>
+      
+      <div class="upgrade-item">
+        <div class="upgrade-info">
+          <h4>🔋 Energiya +1000</h4>
+          <p>Narxi: <span id="energyPrice">300</span> coin<br>
+          Har safar narx 2x oshadi!</p>
+        </div>
+        <button class="buy-btn" id="buyEnergy">300 🪙</button>
+      </div>
+    </div>
+
+    <!-- Withdraw Panel -->
+    <div id="withdraw" class="panel">
+      <div class="withdraw-section">
+        <h3 style="margin-bottom:15px; color:#ffd700;">💸 Pul Yechish</h3>
+        <p style="font-size:14px; opacity:0.9; margin-bottom:10px;">
+          📊 Kurs: 20,000 🪙 = 1,000 so'm<br>
+          ✅ Minimal: 20,000 🪙 (1,000 so'm)<br>
+          ✅ Maksimal: 60,000 🪙 (3,000 so'm)
+        </p>
+        
+        <div style="display:flex; gap:10px; margin:15px 0;">
+          <input type="number" id="withdrawAmount" placeholder="Coin miqdori" 
+                 min="20000" max="60000" style="flex:1; padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.2); color:white;">
+          <button class="buy-btn" id="calcWithdraw">Hisoblash</button>
+        </div>
+        
+        <div id="withdrawResult" style="font-weight:bold; margin:10px 0; min-height:24px;"></div>
+        
+        <button class="withdraw-btn" id="withdrawBtn" disabled>
+          📤 Telegramga Yuborish
+        </button>
+        
+        <div id="withdrawMessage" class="message"></div>
+        <a id="telegramLink" class="telegram-link" href="#" target="_blank" style="display:none;">
+          ✈️ t.me/unknownchat3 ga o'tish
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      🎮 Barcha ma'lumotlar brauzeringizda saqlanadi<br>
+      💡 Yangilashda yo'qolmaydi!
+    </div>
+  </div>
+
+  <script>
+    // ==================== O'YIN MA'LUMOTLARI ====================
+    let game = {
+      coins: 0,
+      energy: 1000,
+      maxEnergy: 1000,
+      coinsPerClick: 1,
+      energyPrice: 300,
+      clickUpgradeLevel: 1,
+      nextClickCost: 15,
+      nextClickValue: 2
+    };
+
+    // ==================== DOM ELEMENTLARI ====================
+    const els = {
+      coinCount: document.getElementById('coinCount'),
+      energyCount: document.getElementById('energyCount'),
+      energyFill: document.getElementById('energyFill'),
+      perClick: document.getElementById('perClick'),
+      currentClick: document.getElementById('currentClick'),
+      nextClick: document.getElementById('nextClick'),
+      energyPrice: document.getElementById('energyPrice'),
+      coinBtn: document.getElementById('coinBtn'),
+      buyClickUpgrade: document.getElementById('buyClickUpgrade'),
+      buyEnergy: document.getElementById('buyEnergy'),
+      withdrawAmount: document.getElementById('withdrawAmount'),
+      calcWithdraw: document.getElementById('calcWithdraw'),
+      withdrawBtn: document.getElementById('withdrawBtn'),
+      withdrawResult: document.getElementById('withdrawResult'),
+      withdrawMessage: document.getElementById('withdrawMessage'),
+      telegramLink: document.getElementById('telegramLink'),
+      navBtns: document.querySelectorAll('.nav-btn'),
+      panels: document.querySelectorAll('.panel')
+    };
+
+    // ==================== YUKLASH / SAQLASH ====================
+    function loadGame() {
+      const saved = localStorage.getItem('coinClickerSave');
+      if (saved) {
+        const data = JSON.parse(saved);
+        game = { ...game, ...data };
+      }
+      updateUI();
+    }
+
+    function saveGame() {
+      localStorage.setItem('coinClickerSave', JSON.stringify(game));
+    }
+
+    // ==================== UI YANGILASH ====================
+    function updateUI() {
+      els.coinCount.textContent = Math.floor(game.coins);
+      els.energyCount.textContent = game.energy;
+      els.energyFill.textContent = `${game.energy}/${game.maxEnergy}`;
+      els.energyFill.style.width = `${(game.energy / game.maxEnergy) * 100}%`;
+      els.perClick.textContent = `+${game.coinsPerClick}`;
+      els.currentClick.textContent = game.coinsPerClick;
+      els.nextClick.textContent = game.nextClickValue;
+      els.energyPrice.textContent = game.energyPrice;
+      
+      // Upgrade button holati
+      els.buyClickUpgrade.disabled = game.coins < game.nextClickCost;
+      els.buyClickUpgrade.textContent = `${game.nextClickCost} 🪙`;
+      
+      els.buyEnergy.disabled = game.coins < game.energyPrice;
+      els.buyEnergy.textContent = `${game.energyPrice} 🪙`;
+      
+      // Withdraw button
+      els.withdrawBtn.disabled = game.coins < 20000;
+      
+      saveGame();
+    }
+
+    // ==================== COIN BOSISH ====================
+    function createClickEffect(x, y, value) {
+      const effect = document.createElement('div');
+      effect.className = 'click-effect';
+      effect.textContent = `+${value}`;
+      effect.style.left = `${x}px`;
+      effect.style.top = `${y}px`;
+      document.body.appendChild(effect);
+      setTimeout(() => effect.remove(), 1000);
+    }
+
+    els.coinBtn.addEventListener('click', (e) => {
+      if (game.energy <= 0) {
+        showMessage("⚠️ Energiya tugadi! Upgrade bo'limidan energiya sotib oling.", "error");
+        return;
+      }
+      
+      // Click effekti
+      const rect = els.coinBtn.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      createClickEffect(x, y, game.coinsPerClick);
+      
+      // Hisoblash
+      game.coins += game.coinsPerClick;
+      game.energy -= 1;
+      
+      // Energiya tugasa rang o'zgartirish
+      if (game.energy <= 0) {
+        els.energyFill.style.background = 'linear-gradient(90deg, #ff416c, #ff4b2b)';
+      } else {
+        els.energyFill.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
+      }
+      
+      updateUI();
+    });
+
+    // ==================== UPGRADE SOTIB OLISH ====================
+    // Click kuchi upgrade
+    els.buyClickUpgrade.addEventListener('click', () => {
+      if (game.coins >= game.nextClickCost) {
+        game.coins -= game.nextClickCost;
+        game.coinsPerClick = game.nextClickValue;
+        game.clickUpgradeLevel++;
+        game.nextClickValue++;
+        game.nextClickCost = Math.floor(15 * Math.pow(1.8, game.clickUpgradeLevel - 1));
+        showMessage("✅ Click kuchi oshirildi!", "success");
+        updateUI();
+      }
+    });
+
+    // Energiya sotib olish
+    els.buyEnergy.addEventListener('click', () => {
+      if (game.coins >= game.energyPrice) {
+        game.coins -= game.energyPrice;
+        game.energy = game.maxEnergy + 1000;
+        game.maxEnergy += 1000;
+        game.energyPrice = Math.floor(game.energyPrice * 2);
+        showMessage("✅ +1000 Energiya qo'shildi!", "success");
+        els.energyFill.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
+        updateUI();
+      }
+    });
+
+    // ==================== NAVIGATSIYA ====================
+    els.navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Active class o'zgartirish
+        els.navBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Panel o'zgartirish
+        els.panels.forEach(p => p.classList.remove('active'));
+        document.getElementById(btn.dataset.panel).classList.add('active');
+      });
+    });
+
+    // ==================== PUL YECHISH ====================
+    let calculatedSum = 0;
+    
+    els.calcWithdraw.addEventListener('click', () => {
+      const amount = parseInt(els.withdrawAmount.value);
+      
+      if (!amount || amount < 20000) {
+        els.withdrawResult.textContent = "❌ Minimal 20,000 coin!";
+        els.withdrawResult.style.color = "#ff6b6b";
+        els.withdrawBtn.disabled = true;
+        return;
+      }
+      if (amount > 60000) {
+        els.withdrawResult.textContent = "❌ Maksimal 60,000 coin!";
+        els.withdrawResult.style.color = "#ff6b6b";
+        els.withdrawBtn.disabled = true;
+        return;
+      }
+      if (amount > game.coins) {
+        els.withdrawResult.textContent = `❌ Sizda faqat ${Math.floor(game.coins)} coin bor!`;
+        els.withdrawResult.style.color = "#ff6b6b";
+        els.withdrawBtn.disabled = true;
+        return;
+      }
+      
+      calculatedSum = Math.floor(amount / 20); // 20,000 coin = 1000 so'm
+      els.withdrawResult.textContent = `✅ ${amount} 🪙 = ${calculatedSum} so'm`;
+      els.withdrawResult.style.color = "#00ff88";
+      els.withdrawBtn.disabled = false;
+    });
+
+    els.withdrawBtn.addEventListener('click', () => {
+      const amount = parseInt(els.withdrawAmount.value);
+      const message = `Salom men pul yechmoqchiman va men ${amount} coin (${calculatedSum} so'm) yechmoqchiman!`;
+      
+      // Xabarni ko'rsatish
+      els.withdrawMessage.textContent = `📝 Quyidagi xabarni nusxalab Telegramga yuboring:\n\n"${message}"`;
+      els.withdrawMessage.className = "message success";
+      
+      // Telegram link
+      const encodedMsg = encodeURIComponent(message);
+      els.telegramLink.href = `https://t.me/unknownchat3?start=${encodedMsg}`;
+      els.telegramLink.style.display = 'inline-block';
+      
+      // Coinlarni ayirish (ixtiyoriy - haqiqiy loyihada server tomonida bajariladi)
+      // game.coins -= amount;
+      // updateUI();
+      
+      showMessage("✅ Xabar tayyor! Telegramga o'tib yuboring.", "success");
+    });
+
+    // ==================== XABAR KO'RSATISH ====================
+    function showMessage(text, type) {
+      // Upgrade panelida vaqtinchalik xabar
+      const upgradePanel = document.getElementById('upgrade');
+      if (upgradePanel.querySelector('.temp-msg')) {
+        upgradePanel.querySelector('.temp-msg').remove();
+      }
+      const msg = document.createElement('div');
+      msg.className = `message ${type} temp-msg`;
+      msg.textContent = text;
+      msg.style.margin = '10px 0';
+      upgradePanel.insertBefore(msg, upgradePanel.firstChild);
+      setTimeout(() => msg.remove(), 3000);
+    }
+
+    // ==================== BOSHLASH ====================
+    window.addEventListener('load', () => {
+      loadGame();
+      
+      // Har 30 soniyada avto-saqlash
+      setInterval(saveGame, 30000);
+      
+      // Energiya to'ldirish animatsiyasi
+      setInterval(() => {
+        if (game.energy < game.maxEnergy && game.energy > 0) {
+          // Energiya sekin tiklanadi (ixtiyoriy)
+          // game.energy = Math.min(game.maxEnergy, game.energy + 1);
+          // updateUI();
+        }
+      }, 1000);
+    });
+
+    // ==================== QO'SHIMCHA: Klaviatura qo'llab-quvvatlash ====================
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && document.getElementById('main').classList.contains('active')) {
+        e.preventDefault();
+        els.coinBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
